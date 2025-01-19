@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -18,16 +18,20 @@ export default function SmartBooking() {
   const [chatMessages, setChatMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
+  // 只滚动对话框
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
   }
 
+  // 当消息更新时滚动到底部
   useEffect(() => {
     scrollToBottom()
   }, [chatMessages])
-
+  
   useEffect(() => {
     setChatMessages([{
       role: 'assistant',
@@ -93,7 +97,7 @@ export default function SmartBooking() {
       
       {/* 智能对话界面 */}
       <Card className="mb-6 p-4">
-        <div className="h-64 overflow-y-auto mb-4">
+        <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
           {chatMessages.map((msg, index) => (
             <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
               <span className={`inline-block p-2 rounded-lg ${
@@ -103,7 +107,6 @@ export default function SmartBooking() {
               </span>
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </div>
         <div className="flex gap-2">
           <Input

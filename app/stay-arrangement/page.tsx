@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -19,6 +19,27 @@ export default function StayArrangement() {
   const [chatMessages, setChatMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  // 只滚动对话框
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }
+
+  // 当消息更新时滚动到底部
+  useEffect(() => {
+    scrollToBottom()
+  }, [chatMessages])
+
+  // 初始化欢迎消息
+  useEffect(() => {
+    setChatMessages([{
+      role: 'assistant',
+      content: '您好！我是您的旅居规划助手。我可以帮您：\n• 推荐适合的居住地点\n• 制定个性化旅居方案\n• 提供当地生活建议\n• 解答旅居相关问题\n请问您想了解什么？'
+    }])
+  }, [])
 
   const callQianwenAPI = async (messages: Message[]) => {
     try {
@@ -27,7 +48,21 @@ export default function StayArrangement() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: `你是一个专业的贵州旅居规划顾问。请遵循以下规则：
+1. 熟悉贵州各地的气候特点、生活环境和文化特色
+2. 根据用户的时间、预算和偏好推荐合适的居住地
+3. 提供详细的旅居建议，包括住宿、交通、生活设施等
+4. 回答要专业且实用，重点突出
+5. 主动了解用户具体需求，以提供更精准的建议
+6. 结合用户选择的目的地、时间和主题偏好进行推荐`
+            },
+            ...messages
+          ]
+        }),
       })
       
       if (!response.ok) {
@@ -51,9 +86,16 @@ export default function StayArrangement() {
 
       try {
         const aiResponse = await callQianwenAPI([...chatMessages, userMessage])
-        setChatMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
+        setChatMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: aiResponse 
+        }])
       } catch (error) {
         console.error('发送消息错误:', error)
+        setChatMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: '抱歉，系统暂时无法回应，请稍后重试。您也可以使用下方的旅居规划器来获取建议。' 
+        }])
       } finally {
         setIsLoading(false)
       }
@@ -66,12 +108,15 @@ export default function StayArrangement() {
       
       {/* 智能对话界面 */}
       <Card className="mb-6 p-4">
-        <div className="h-64 overflow-y-auto mb-4">
+        <div 
+          ref={chatContainerRef}
+          className="h-64 overflow-y-auto mb-4 whitespace-pre-line"
+        >
           {chatMessages.map((msg, index) => (
-            <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-2 rounded-lg ${
+            <div key={index} className={`mb-3 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+              <span className={`inline-block p-3 rounded-lg ${
                 msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'
-              }`}>
+              } max-w-[85%]`}>
                 {msg.content}
               </span>
             </div>
@@ -81,13 +126,15 @@ export default function StayArrangement() {
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="输入您的旅居安排问题..."
+            placeholder="想了解哪个地方？需要什么建议？"
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             disabled={isLoading}
+            className="flex-1"
           />
           <Button 
-            onClick={handleSendMessage} 
+            onClick={handleSendMessage}
             disabled={isLoading}
+            className="min-w-[80px]"
           >
             {isLoading ? '发送中...' : '发送'}
           </Button>
