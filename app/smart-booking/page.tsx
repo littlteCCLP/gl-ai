@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -9,36 +9,101 @@ import { Star, MessageCircle } from 'lucide-react'
 import Image from 'next/image'
 import { BottomNavigation } from '@/components/BottomNavigation'
 
-export default function SmartBooking() {
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([])
-  const [inputMessage, setInputMessage] = useState('')
+type Message = {
+  role: 'user' | 'assistant'
+  content: string
+}
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      setChatMessages([...chatMessages, { role: 'user', content: inputMessage }])
-      // Here you would typically call an API to get the AI response
-      // For now, we'll just echo the user's message
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: `您说: ${inputMessage}` }])
-      }, 1000)
+export default function SmartBooking() {
+  const [chatMessages, setChatMessages] = useState<Message[]>([])
+  const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [chatMessages])
+
+  useEffect(() => {
+    setChatMessages([{
+      role: 'assistant',
+      content: '您好！我是您的智能订购助手。需要我帮您预订景点门票或酒店吗？'
+    }])
+  }, [])
+
+  const callQianwenAPI = async (messages: Message[]) => {
+    try {
+      const response = await fetch('/api/qianwen', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: '你是一个专业的贵州旅游产品订购助手，熟悉贵州的景点门票、酒店住宿等旅游产品。请为用户提供专业的咨询和订购建议。'
+            },
+            ...messages
+          ]
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('API 请求失败')
+      }
+      
+      const data = await response.json()
+      return data.response
+    } catch (error) {
+      console.error('调用通义千问API错误:', error)
+      return '抱歉，我现在无法回答。请稍后再试。'
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() && !isLoading) {
+      setIsLoading(true)
+      const userMessage = { role: 'user', content: inputMessage }
+      setChatMessages(prev => [...prev, userMessage])
       setInputMessage('')
+
+      try {
+        const aiResponse = await callQianwenAPI([...chatMessages, userMessage])
+        setChatMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
+      } catch (error) {
+        console.error('发送消息错误:', error)
+        setChatMessages(prev => [...prev, { 
+          role: 'assistant', 
+          content: '抱歉，系统暂时无法回应，请稍后再试。' 
+        }])
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-12"> {/* Updated padding-bottom */}
+    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-12">
       <h1 className="text-2xl font-bold mb-4">智能订购</h1>
       
-      {/* Chat Interface */}
+      {/* 智能对话界面 */}
       <Card className="mb-6 p-4">
         <div className="h-64 overflow-y-auto mb-4">
           {chatMessages.map((msg, index) => (
             <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+              <span className={`inline-block p-2 rounded-lg ${
+                msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'
+              }`}>
                 {msg.content}
               </span>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
         <div className="flex gap-2">
           <Input
@@ -46,12 +111,18 @@ export default function SmartBooking() {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="订个酒店、找个门票、比个价格..."
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            disabled={isLoading}
           />
-          <Button onClick={handleSendMessage}>发送</Button>
+          <Button 
+            onClick={handleSendMessage}
+            disabled={isLoading}
+          >
+            {isLoading ? '发送中...' : '发送'}
+          </Button>
         </div>
       </Card>
       
-      {/* Product Showcase */}
+      {/* 产品展示部分保持不变 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {products.map((product, index) => (
           <Card key={index} className="overflow-hidden">

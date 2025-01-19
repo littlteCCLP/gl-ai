@@ -9,32 +9,69 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, Calendar, Palette } from 'lucide-react'
 import { BottomNavigation } from '@/components/BottomNavigation'
 
-export default function StayArrangement() {
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([])
-  const [inputMessage, setInputMessage] = useState('')
+// 添加类型定义
+type Message = {
+  role: 'user' | 'assistant'
+  content: string
+}
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      setChatMessages([...chatMessages, { role: 'user', content: inputMessage }])
-      // Here you would typically call an API to get the AI response
-      // For now, we'll just echo the user's message
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: `您说: ${inputMessage}` }])
-      }, 1000)
+export default function StayArrangement() {
+  const [chatMessages, setChatMessages] = useState<Message[]>([])
+  const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const callQianwenAPI = async (messages: Message[]) => {
+    try {
+      const response = await fetch('/api/qianwen', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('API 请求失败')
+      }
+      
+      const data = await response.json()
+      return data.response
+    } catch (error) {
+      console.error('调用通义千问API错误:', error)
+      return '抱歉，我现在无法回答。请稍后再试。'
+    }
+  }
+
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() && !isLoading) {
+      setIsLoading(true)
+      const userMessage = { role: 'user', content: inputMessage }
+      setChatMessages(prev => [...prev, userMessage])
       setInputMessage('')
+
+      try {
+        const aiResponse = await callQianwenAPI([...chatMessages, userMessage])
+        setChatMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
+      } catch (error) {
+        console.error('发送消息错误:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-10"> {/* Updated padding-bottom */}
+    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-10">
       <h1 className="text-2xl font-bold mb-4">旅居安排</h1>
       
-      {/* Chat Interface */}
+      {/* 智能对话界面 */}
       <Card className="mb-6 p-4">
         <div className="h-64 overflow-y-auto mb-4">
           {chatMessages.map((msg, index) => (
             <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+              <span className={`inline-block p-2 rounded-lg ${
+                msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'
+              }`}>
                 {msg.content}
               </span>
             </div>
@@ -46,12 +83,18 @@ export default function StayArrangement() {
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="输入您的旅居安排问题..."
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            disabled={isLoading}
           />
-          <Button onClick={handleSendMessage}>发送</Button>
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={isLoading}
+          >
+            {isLoading ? '发送中...' : '发送'}
+          </Button>
         </div>
       </Card>
       
-      {/* Stay Arrangement Planner */}
+      {/* 旅居规划器部分保持不变 */}
       <Card className="p-4">
         <h2 className="text-xl font-semibold mb-4">旅居规划器</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
