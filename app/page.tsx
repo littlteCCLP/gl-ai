@@ -128,14 +128,14 @@ export default function AiAssistant() {
 const featureCards = [
   { 
     title: "旅游规划", 
-    description: "请按目的地、主题、游玩时间、交通方式、预算等", 
+    description: "请按目的地、主题、游玩时间、交通方式、预算来对话", 
     icon: <MapPin className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" />, 
     bgColor: "bg-blue-100 group-hover:bg-blue-200 transition-colors duration-300",
     link: "/travel-planning"
   },
   { 
     title: "旅居安排", 
-    description: "请按居住目的地、居住时间、主题偏好来对话", 
+    description: "请按居住目的地、主题、时间、预算来对话", 
     icon: <Home className="w-6 h-6 text-red-600 group-hover:text-red-700 transition-colors duration-300" />, 
     bgColor: "bg-red-100 group-hover:bg-red-200 transition-colors duration-300",
     link: "/stay-arrangement"
@@ -148,22 +148,22 @@ const featureCards = [
     link: "/smart-booking"
   },
   { 
-    title: "周边深度游", 
-    description: "周边深度游，探索隐藏活动", 
+    title: "本地活动", 
+    description: "探索本地隐藏活动", 
     icon: <Users className="w-6 h-6 text-yellow-600 group-hover:text-yellow-700 transition-colors duration-300" />, 
     bgColor: "bg-yellow-100 group-hover:bg-yellow-200 transition-colors duration-300",
     link: "/local-tours"  
   },
   {
     title: "旅行记录",
-    description: "给我一张你的旅游图片，快速生产旅游日志，一键分享",
+    description: "给我一张你的旅游图片，快速生成旅游日志",
     icon: <BookOpen className="w-6 h-6 text-green-600 group-hover:text-green-700 transition-colors duration-300" />,
     bgColor: "bg-green-100 group-hover:bg-green-200 transition-colors duration-300",
     link: "/travel-logs"
   },
   {
-    title: "景区自助导览",
-    description: "智能语音讲解，深入了解景点文化",
+    title: "智能导览",
+    description: "在线智能导游，快速了解景区",
     icon: <Compass className="w-6 h-6 text-indigo-600 group-hover:text-indigo-700 transition-colors duration-300" />,
     bgColor: "bg-indigo-100 group-hover:bg-indigo-200 transition-colors duration-300",
     link: "/self-guided-tour"

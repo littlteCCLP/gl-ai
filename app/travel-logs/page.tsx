@@ -2,158 +2,184 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { Upload, Home, Compass, Heart, MessageCircle, Share2, PlusCircle, ImageIcon } from 'lucide-react'
+import { Mic, Send, ImageIcon, Video, Calculator, Users, PlusCircle, History, User, ChevronDown, ChevronUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { BottomNavigation } from '@/components/BottomNavigation'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function TravelLogs() {
-  const [selectedImages, setSelectedImages] = useState<File[]>([])
+  const [inputMessage, setInputMessage] = useState('')
+  const [showTools, setShowTools] = useState(false)
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
+    { id: '1', title: '贵州三日游规划' },
+    { id: '2', title: '黄果树瀑布一日游' },
+  ])
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setSelectedImages(Array.from(event.target.files))
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      setInputMessage('')
     }
   }
 
-  const handleGenerateTravelLog = () => {
-    // Here you would implement the logic to generate and share the travel log
-    console.log('Generating travel log with', selectedImages.length, 'images')
-  }
+  const quickTools = [
+    { icon: <ImageIcon className="w-5 h-5" />, label: 'AI修图' },
+    { icon: <Video className="w-5 h-5" />, label: 'AI剪辑' },
+    { icon: <Calculator className="w-5 h-5" />, label: '智能记账' },
+    { icon: <Users className="w-5 h-5" />, label: '圈子' },
+  ]
+
+  const contentTypes = [
+    {
+      type: '文案',
+      placeholder: '想分享旅途快乐，帮我生成文案'
+    },
+    {
+      type: '图片',
+      placeholder: '想去除图片背景的人群，请帮我美化一下'
+    },
+    {
+      type: '视频',
+      placeholder: '请帮我生成一个贵州旅游vlog'
+    },
+    {
+      type: '记账',
+      placeholder: '我想知道这次旅游花了多少钱'
+    }
+  ]
 
   return (
-    <div className="min-h-screen max-w-lg mx-auto bg-white pb-10"> {/* Updated padding-bottom */}
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b p-3">
-        <h1 className="text-lg font-semibold text-center">旅行记录</h1>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="max-w-[414px] mx-auto bg-transparent min-h-screen pb-20">
+        {/* Header */}
+        <header className="flex items-center justify-center p-4">
+          <h1 className="text-lg font-semibold">旅行记录助手</h1>
+        </header>
 
-      {/* Upload Section */}
-      <div className="p-4 bg-gradient-to-b from-blue-50 to-white">
-        <Card className="p-6 text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-              <Upload className="w-8 h-8 text-blue-500" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mb-1">上传照片生成游记</h2>
-              <p className="text-sm text-gray-500 mb-4">AI智能分析照片，一键生成精美游记</p>
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-              id="image-upload"
+        {/* Profile Section */}
+        <div className="flex flex-col items-center mt-4 mb-6">
+          <div className="w-16 h-16 rounded-full overflow-hidden mb-3">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+              alt="贵贵助手"
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
             />
-            <label htmlFor="image-upload">
-              <Button as="span" size="lg" className="gap-2 cursor-pointer">
-                <ImageIcon className="w-5 h-5" />
-                选择照片
-              </Button>
-            </label>
-            {selectedImages.length > 0 && (
-              <div className="mt-2">
-                <p className="text-sm text-gray-600">{selectedImages.length} 张照片已选择</p>
-                <Button onClick={handleGenerateTravelLog} className="mt-2">
-                  生成游记
-                </Button>
+          </div>
+          <h2 className="text-lg font-semibold mb-1">欢迎使用旅行记录助手</h2>
+          <p className="text-sm text-gray-500">让我们一起记录精彩旅程！</p>
+        </div>
+
+        {/* Content Types */}
+        <Card className="mx-4 p-4">
+          <div className="space-y-3">
+            {contentTypes.map((content, index) => (
+              <div key={index} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                <div className="font-medium text-sm min-w-[2.5rem]">{content.type}</div>
+                <div className="text-xs text-gray-500">{content.placeholder}</div>
               </div>
-            )}
+            ))}
+            <div>
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center justify-between"
+                onClick={() => setShowTools(!showTools)}
+              >
+                <span>更多游记工具</span>
+                {showTools ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+              
+              {showTools && (
+                <div className="grid grid-cols-4 gap-4 mt-4">
+                  {quickTools.map((tool, index) => (
+                    <button key={index} className="flex flex-col items-center gap-1">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        {tool.icon}
+                      </div>
+                      <span className="text-xs">{tool.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </Card>
-      </div>
 
-      {/* Travel Logs Section */}
-      <div className="p-4">
-        <h2 className="text-lg font-semibold mb-4">精选游记</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {travelLogs.map((log, index) => (
-            <Card key={index} className="overflow-hidden">
-              <div className="relative">
-                <div className="aspect-[3/4]">
-                  <Image
-                    src={log.image || "/placeholder.svg"}
-                    alt={log.title}
-                    layout="fill"
-                    objectFit="cover"
-                  />
+        {/* Chat Interface */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#F8F8F8] border-t">
+          <div className="max-w-[414px] mx-auto px-4 py-3">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <User className="w-5 h-5 text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <Link href="/" className="w-full">
+                    <DropdownMenuLabel className="flex items-center gap-2 cursor-pointer hover:bg-gray-100">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+                        alt="贵贵 Logo"
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span className="text-sm">贵贵助手</span>
+                    </DropdownMenuLabel>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>我的</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    <span>新建对话</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>历史对话</DropdownMenuLabel>
+                  {conversations.map((conv) => (
+                    <DropdownMenuItem key={conv.id} className="flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      <span className="truncate">{conv.title}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative flex-1">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="在这里输入问题"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <Mic className="w-5 h-5 text-gray-400" />
                 </div>
-                <div className="absolute top-2 left-2">
-                  <div className="flex items-center gap-1 bg-black bg-opacity-50 rounded-full px-2 py-1">
-                    <Image
-                      src={log.authorAvatar || "/placeholder.svg"}
-                      alt={log.author}
-                      width={20}
-                      height={20}
-                      className="rounded-full"
-                    />
-                    <span className="text-xs text-white">{log.author}</span>
-                  </div>
-                </div>
+                <Button 
+                  onClick={handleSendMessage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
+                  variant="ghost"
+                >
+                  <Send className="w-5 h-5 text-gray-400" />
+                </Button>
               </div>
-              <div className="p-2">
-                <h3 className="text-sm font-semibold line-clamp-2 mb-1">{log.title}</h3>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
-                      {log.likes}
-                    </button>
-                    <button className="flex items-center gap-1">
-                      <MessageCircle className="w-3 h-3" />
-                      {log.comments}
-                    </button>
-                  </div>
-                  <button>
-                    <Share2 className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            </Card>
-          ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      <BottomNavigation currentPage="travel-logs" />
     </div>
   )
 }
-
-const travelLogs = [
-  {
-    title: "黄果树瀑布之旅 | 壮观的亚洲第一瀑布",
-    author: "贵州探索者",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    image: "/placeholder.svg?height=400&width=300",
-    likes: "2.8k",
-    comments: "326",
-  },
-  {
-    title: "青岩古镇｜漫步明清建筑群，品味贵州小吃",
-    author: "美食侦探",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    image: "/placeholder.svg?height=400&width=300",
-    likes: "1.5k",
-    comments: "158",
-  },
-  {
-    title: "梵净山朝圣之旅｜云端佛国的震撼",
-    author: "旅行笔记",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    image: "/placeholder.svg?height=400&width=300",
-    likes: "3.2k",
-    comments: "428",
-  },
-  {
-    title: "西江千户苗寨｜领略苗族文化的魅力",
-    author: "文化探索",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    image: "/placeholder.svg?height=400&width=300",
-    likes: "2.1k",
-    comments: "246",
-  },
-]
 

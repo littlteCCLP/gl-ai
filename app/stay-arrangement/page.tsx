@@ -1,209 +1,315 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Calendar, Palette } from 'lucide-react'
-import { BottomNavigation } from '@/components/BottomNavigation'
-
-// 添加类型定义
-type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
+import { Slider } from "@/components/ui/slider"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Menu, Mic, Send, PlusCircle, History, User, ChevronDown, ChevronUp } from 'lucide-react'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import Image from 'next/image'
+import Link from 'next/link'
+import { 
+DropdownMenu,
+DropdownMenuContent,
+DropdownMenuItem,
+DropdownMenuLabel,
+DropdownMenuSeparator,
+DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function StayArrangement() {
-  const [chatMessages, setChatMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const [selectedDays, setSelectedDays] = useState([30])
+  const [selectedDestinations, setSelectedDestinations] = useState<string[]>([])
+  const [selectedAccommodation, setSelectedAccommodation] = useState<string[]>([])
+  const [selectedHousingTypes, setSelectedHousingTypes] = useState<string[]>([])
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([])
+  const [companions, setCompanions] = useState(1)
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
+    { id: '1', title: '贵州三日游规划' },
+    { id: '2', title: '黄果树瀑布一日游' },
+  ])
+  const [isExpanded, setIsExpanded] = useState(false)
 
-  // 只滚动对话框
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
-    }
-  }
-
-  // 当消息更新时滚动到底部
-  useEffect(() => {
-    scrollToBottom()
-  }, [chatMessages])
-
-  // 初始化欢迎消息
-  useEffect(() => {
-    setChatMessages([{
-      role: 'assistant',
-      content: '您好！我是您的旅居规划助手。我可以帮您：\n• 推荐适合的居住地点\n• 制定个性化旅居方案\n• 提供当地生活建议\n• 解答旅居相关问题\n请问您想了解什么？'
-    }])
-  }, [])
-
-  const callQianwenAPI = async (messages: Message[]) => {
-    try {
-      const response = await fetch('/api/qianwen', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: `你是一个专业的贵州旅居规划顾问。请遵循以下规则：
-1. 熟悉贵州各地的气候特点、生活环境和文化特色
-2. 根据用户的时间、预算和偏好推荐合适的居住地
-3. 提供详细的旅居建议，包括住宿、交通、生活设施等
-4. 回答要专业且实用，重点突出
-5. 主动了解用户具体需求，以提供更精准的建议
-6. 结合用户选择的目的地、时间和主题偏好进行推荐`
-            },
-            ...messages
-          ]
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('API 请求失败')
-      }
-      
-      const data = await response.json()
-      return data.response
-    } catch (error) {
-      console.error('调用通义千问API错误:', error)
-      return '抱歉，我现在无法回答。请稍后再试。'
-    }
-  }
-
-  const handleSendMessage = async () => {
-    if (inputMessage.trim() && !isLoading) {
-      setIsLoading(true)
-      const userMessage = { role: 'user', content: inputMessage }
-      setChatMessages(prev => [...prev, userMessage])
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
       setInputMessage('')
-
-      try {
-        const aiResponse = await callQianwenAPI([...chatMessages, userMessage])
-        setChatMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: aiResponse 
-        }])
-      } catch (error) {
-        console.error('发送消息错误:', error)
-        setChatMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: '抱歉，系统暂时无法回应，请稍后重试。您也可以使用下方的旅居规划器来获取建议。' 
-        }])
-      } finally {
-        setIsLoading(false)
-      }
     }
   }
+
+  const destinations = {
+    '贵阳市': ['南明区', '云岩区', '花溪区', '乌当区', '白云区', '观山湖区', '清镇市'],
+    '遵义市': ['红花岗区', '汇川区', '播州区', '桐梓县', '绥阳县'],
+    '安顺市': ['西秀区', '平坝区', '普定县', '镇宁布依族苗族自治县'],
+    '毕节市': ['七星关区', '大方县', '威宁彝族回族苗族自治县'],
+    '铜仁市': ['碧江区', '万山区', '江口县', '玉屏侗族自治县'],
+    '黔东南州': ['凯里市', '黄平县', '施秉县', '三穗县'],
+    '黔南州': ['都匀市', '福泉市', '荔波县', '贵定县'],
+    '黔西南州': ['兴义市', '兴仁市', '安龙县', '晴隆县'],
+    '六盘水市': ['钟山区', '六枝特区', '水城县', '盘州市'],
+  }
+
+  const accommodationPreferences = [
+    '近商圈', '交通便利', '近自然/郊区', '近景点'
+  ]
+
+  const housingTypes = [
+    '公寓', '民宿', '酒店长租', '包吃包住'
+  ]
+
+  const themePreferences = [
+    '文化体验', '自然风光', '美食探索', '休闲放松', '疗康养', '户外运动'
+  ]
+
+  const presetQuestions = [
+    "我想去贵州避暑，帮我规划一个月的旅居行程",
+    "帮我找一个在贵州包吃包住的旅居地",
+    "帮我规划一个去村寨、古镇、乡村各住10天的旅居安排"
+  ]
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-10">
-      <h1 className="text-2xl font-bold mb-4">旅居安排</h1>
-      
-      {/* 智能对话界面 */}
-      <Card className="mb-6 p-4">
-        <div 
-          ref={chatContainerRef}
-          className="h-64 overflow-y-auto mb-4 whitespace-pre-line"
-        >
-          {chatMessages.map((msg, index) => (
-            <div key={index} className={`mb-3 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-3 rounded-lg ${
-                msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'
-              } max-w-[85%]`}>
-                {msg.content}
-              </span>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-[414px] mx-auto bg-white min-h-screen">
+        {/* Welcome Header */}
+        <div className="p-6 text-center">
+          <div className="w-16 h-16 mx-auto mb-3">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+              alt="贵贵助手"
+              width={64}
+              height={64}
+              className="rounded-full"
+            />
+          </div>
+          <h1 className="text-lg font-bold mb-1">欢迎使用旅居规划助手</h1>
+          <p className="text-xs text-gray-500">让我们一起规划您的完美旅居！</p>
+        </div>
+
+        {/* Stay Preferences */}
+        <Card className="mx-4 mb-6">
+          <CardContent className="p-4 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">旅居时间</label>
+              <div className="flex items-center space-x-2">
+                <Slider
+                  defaultValue={[30]}
+                  max={365}
+                  min={30}
+                  step={1}
+                  value={selectedDays}
+                  onValueChange={setSelectedDays}
+                  className="flex-1"
+                />
+                <span className="text-sm font-medium">{selectedDays[0]}天</span>
+              </div>
             </div>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="想了解哪个地方？需要什么建议？"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button 
-            onClick={handleSendMessage}
-            disabled={isLoading}
-            className="min-w-[80px]"
-          >
-            {isLoading ? '发送中...' : '发送'}
-          </Button>
-        </div>
-      </Card>
-      
-      {/* 旅居规划器部分保持不变 */}
-      <Card className="p-4">
-        <h2 className="text-xl font-semibold mb-4">旅居规划器</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="destination" className="mb-2 flex items-center">
-              <MapPin className="w-4 h-4 mr-2" />
-              居住目的地
-            </Label>
-            <Select>
-              <SelectTrigger id="destination">
-                <SelectValue placeholder="选择目的地" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="guiyang">贵阳</SelectItem>
-                <SelectItem value="zunyi">遵义</SelectItem>
-                <SelectItem value="anshun">安顺</SelectItem>
-                <SelectItem value="kaili">凯里</SelectItem>
-                <SelectItem value="xingyi">兴义</SelectItem>
-              </SelectContent>
-            </Select>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">目的地</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="选择目的地" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(destinations).map(([city, districts]) => (
+                    <SelectGroup key={city}>
+                      <SelectLabel>{city}</SelectLabel>
+                      {districts.map((district) => (
+                        <SelectItem key={district} value={district}>
+                          {district}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center justify-between"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                <span>更多偏好设置</span>
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+              
+              {isExpanded && (
+                <div className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">居住地偏好</label>
+                    <div className="flex flex-wrap gap-2">
+                      {accommodationPreferences.map((pref) => (
+                        <Badge
+                          key={pref}
+                          variant={selectedAccommodation.includes(pref) ? "default" : "secondary"}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedAccommodation(prev => 
+                              prev.includes(pref) 
+                                ? prev.filter(p => p !== pref)
+                                : [...prev, pref]
+                            )
+                          }}
+                        >
+                          {pref}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">住房类型</label>
+                    <div className="flex flex-wrap gap-2">
+                      {housingTypes.map((type) => (
+                        <Badge
+                          key={type}
+                          variant={selectedHousingTypes.includes(type) ? "default" : "secondary"}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedHousingTypes(prev => 
+                              prev.includes(type) 
+                                ? prev.filter(t => t !== type)
+                                : [...prev, type]
+                            )
+                          }}
+                        >
+                          {type}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">主题偏好</label>
+                    <div className="flex flex-wrap gap-2">
+                      {themePreferences.map((theme) => (
+                        <Badge
+                          key={theme}
+                          variant={selectedThemes.includes(theme) ? "default" : "secondary"}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedThemes(prev => 
+                              prev.includes(theme) 
+                                ? prev.filter(t => t !== theme)
+                                : [...prev, theme]
+                            )
+                          }}
+                        >
+                          {theme}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">预算（元）</label>
+                    <div className="flex items-center gap-2">
+                      <Input type="number" placeholder="最低预算" className="w-1/2" />
+                      <span>至</span>
+                      <Input type="number" placeholder="最高预算" className="w-1/2" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">同行人数（人）</label>
+                    <Input 
+                      type="number" 
+                      min={1}
+                      value={companions}
+                      onChange={(e) => setCompanions(parseInt(e.target.value) || 1)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button className="w-full">生成我的旅居方案</Button>
+          </CardContent>
+        </Card>
+
+        {/* Preset Questions */}
+        <Card className="mx-4 mb-6">
+          <CardContent className="p-4">
+            <ul className="space-y-2">
+              {presetQuestions.map((question, index) => (
+                <li key={index} className="text-sm text-black cursor-pointer hover:underline">
+                  {question}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* Chat Interface */}
+        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 bg-[#F8F8F8] w-full max-w-[414px]">
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <Menu className="w-5 h-5 text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <Link href="/" className="w-full">
+                    <DropdownMenuLabel className="flex items-center gap-2 cursor-pointer hover:bg-gray-100">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+                        alt="贵贵 Logo"
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span className="text-sm">贵贵助手</span>
+                    </DropdownMenuLabel>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>我的</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    <span>新建对话</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>历史对话</DropdownMenuLabel>
+                  {conversations.map((conv) => (
+                    <DropdownMenuItem key={conv.id} className="flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      <span className="truncate">{conv.title}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative flex-1">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="在这里输入问题"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <Mic className="w-5 h-5 text-gray-400" />
+                </div>
+                <Button 
+                  onClick={handleSendMessage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
+                  variant="ghost"
+                >
+                  <Send className="w-5 h-5 text-gray-400" />
+                </Button>
+              </div>
+            </div>
           </div>
-          
-          <div>
-            <Label htmlFor="duration" className="mb-2 flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              居住时间
-            </Label>
-            <Select>
-              <SelectTrigger id="duration">
-                <SelectValue placeholder="选择时间" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1-7">1-7天</SelectItem>
-                <SelectItem value="8-30">8-30天</SelectItem>
-                <SelectItem value="1-3">1-3个月</SelectItem>
-                <SelectItem value="3+">3个月以上</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="md:col-span-2">
-            <Label htmlFor="theme" className="mb-2 flex items-center">
-              <Palette className="w-4 h-4 mr-2" />
-              主题偏好
-            </Label>
-            <Select>
-              <SelectTrigger id="theme">
-                <SelectValue placeholder="选择主题" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="culture">文化体验</SelectItem>
-                <SelectItem value="nature">自然风光</SelectItem>
-                <SelectItem value="food">美食之旅</SelectItem>
-                <SelectItem value="relaxation">休闲放松</SelectItem>
-                <SelectItem value="adventure">探险刺激</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
-        <Button className="mt-4 w-full">生成旅居方案</Button>
-      </Card>
-      <BottomNavigation currentPage="stay-arrangement" />
+      </div>
     </div>
   )
 }

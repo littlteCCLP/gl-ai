@@ -3,85 +3,212 @@
 import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Home, Map, Calendar, Star, User, Info, Utensils, Car, TreesIcon as Tree } from 'lucide-react'
+import { Card } from "@/components/ui/card"
+import { MapPin, Landmark, PartyPopper, Music, EyeOff, Menu, Mic, Send, PlusCircle, History, User, TableIcon as Toilet, Utensils, Info, Car } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { BottomNavigation } from '@/components/BottomNavigation'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+interface MapMarker {
+  id: string;
+  type: 'landmark' | 'toilet' | 'service' | 'restaurant' | 'transport';
+  position: { x: number; y: number };
+  title: string;
+}
 
 export default function SelfGuidedTour() {
-  const [selectedSpot, setSelectedSpot] = useState<string | null>(null)
+  const [inputMessage, setInputMessage] = useState('')
+  const [showPointsPanel, setShowPointsPanel] = useState(false)
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
+    { id: '1', title: '黄果树瀑布导览' },
+    { id: '2', title: '西江千户苗寨导览' },
+  ])
 
-  const spots = [
-    { id: '1', x: 45, y: 20, type: 'waterfall', name: '恢宏瀑布' },
-    { id: '2', x: 42, y: 25, type: 'info', name: '临瀑观景' },
-    { id: '3', x: 48, y: 30, type: 'entrance', name: 'VIP专属入口' },
-    { id: '4', x: 35, y: 35, type: 'parking', name: '停车场地' },
-    { id: '5', x: 40, y: 40, type: 'entrance', name: '陡坡塘大门' },
-    { id: '6', x: 55, y: 45, type: 'pavilion', name: '观景亭' },
-    { id: '7', x: 30, y: 50, type: 'building', name: '天主教堂' },
-    { id: '8', x: 45, y: 55, type: 'waterfall', name: '水帘洞' },
-    { id: '9', x: 50, y: 60, type: 'rest', name: '休息区' },
-    { id: '10', x: 40, y: 65, type: 'entrance', name: '游客中心' },
-    { id: '11', x: 60, y: 70, type: 'waterfall', name: '滴水滩' },
-    { id: '12', x: 45, y: 75, type: 'parking', name: '大巴停车场' },
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      setInputMessage('')
+    }
+  }
+
+  const mapMarkers: MapMarker[] = [
+    { id: '1', type: 'landmark', position: { x: 30, y: 20 }, title: '观景台' },
+    { id: '2', type: 'landmark', position: { x: 45, y: 35 }, title: '瀑布' },
+    { id: '3', type: 'toilet', position: { x: 25, y: 40 }, title: '公共厕所' },
+    { id: '4', type: 'service', position: { x: 60, y: 30 }, title: '游客中心' },
+    { id: '5', type: 'restaurant', position: { x: 40, y: 60 }, title: '餐厅' },
+    { id: '6', type: 'transport', position: { x: 70, y: 50 }, title: '观光车站' },
+    { id: '7', type: 'landmark', position: { x: 55, y: 70 }, title: '文化展览' },
+    { id: '8', type: 'toilet', position: { x: 75, y: 65 }, title: '公共厕所' },
+    { id: '9', type: 'service', position: { x: 35, y: 75 }, title: '急救站' },
+    { id: '10', type: 'restaurant', position: { x: 50, y: 45 }, title: '小吃街' },
   ]
 
+  const getMarkerIcon = (type: MapMarker['type']) => {
+    switch (type) {
+      case 'landmark': return <Landmark className="w-4 h-4 text-blue-500" />;
+      case 'toilet': return <Toilet className="w-4 h-4 text-green-500" />;
+      case 'service': return <Info className="w-4 h-4 text-purple-500" />;
+      case 'restaurant': return <Utensils className="w-4 h-4 text-red-500" />;
+      case 'transport': return <Car className="w-4 h-4 text-yellow-500" />;
+    }
+  }
+
   return (
-    <div className="min-h-screen max-w-lg mx-auto bg-white relative pb-20">
-      {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white max-w-lg mx-auto">
-        <div className="flex items-center gap-2 p-3 border-b">
-          <div className="flex-1 relative">
-            <Input
-              placeholder="搜索景点"
-              className="pl-9 py-1.5 bg-gray-100 border-none text-sm"
+    <div className="min-h-screen bg-blue-50 relative">
+      <div className="max-w-[414px] mx-auto bg-white min-h-screen pb-20">
+        {/* Main Map Area */}
+        <div className="relative w-full h-[calc(100vh-80px)]">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ea3d2bca911cd746e4869f8c6c0c15c-Nc8dPRXi0ShZE5N9drElHEMFVgA6Qd.png"
+            alt="Scenic Area Map"
+            fill
+            className="object-cover"
+          />
+          
+          {/* Map Markers */}
+          {mapMarkers.map((marker) => (
+            <div
+              key={marker.id}
+              className="absolute"
+              style={{
+                left: `${marker.position.x}%`,
+                top: `${marker.position.y}%`,
+                transform: 'translate(-50%, -50%)'
+              }}
+            >
+              <div className="bg-white rounded-full p-1 shadow-md hover:scale-110 transition-transform cursor-pointer">
+                {getMarkerIcon(marker.type)}
+              </div>
+            </div>
+          ))}
+          
+          {/* Left Toolbar */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+            <Button 
+              variant="secondary" 
+              className="rounded-lg bg-white shadow-lg px-2 py-1.5 h-auto flex flex-col items-center gap-0.5 min-w-[48px]"
+              onClick={() => setShowPointsPanel(!showPointsPanel)}
+            >
+              <Landmark className="h-4 w-4" />
+              <span className="text-[10px]">景点</span>
+            </Button>
+            <Button 
+              variant="secondary" 
+              className="rounded-lg bg-white shadow-lg px-2 py-1.5 h-auto flex flex-col items-center gap-0.5 min-w-[48px]"
+            >
+              <PartyPopper className="h-4 w-4" />
+              <span className="text-[10px]">活动</span>
+            </Button>
+            <Button 
+              variant="secondary" 
+              className="rounded-lg bg-white shadow-lg px-2 py-1.5 h-auto flex flex-col items-center gap-0.5 min-w-[48px]"
+            >
+              <Music className="h-4 w-4" />
+              <span className="text-[10px]">音乐</span>
+            </Button>
+            <Button 
+              variant="secondary" 
+              className="rounded-lg bg-white shadow-lg px-2 py-1.5 h-auto flex flex-col items-center gap-0.5 min-w-[48px]"
+            >
+              <EyeOff className="h-4 w-4" />
+              <span className="text-[10px]">隐藏</span>
+            </Button>
+          </div>
+
+          {/* Character Image - Bottom Left */}
+          <div className="absolute left-4 bottom-4">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/95f5a967a223392503b93d8b8942eb4-3367jCGVsa4pHwByjnLXcPSQp30QhW.png"
+              alt="Virtual Guide"
+              width={120}
+              height={120}
+              className="select-none pointer-events-none"
             />
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+
+          {/* My Location Button */}
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            className="absolute bottom-4 right-4 rounded-full bg-white shadow-lg"
+          >
+            <MapPin className="h-5 w-5" />
+            <span className="sr-only">我的位置</span>
+          </Button>
+        </div>
+
+        {/* Chat Interface */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#F8F8F8] border-t">
+          <div className="max-w-[414px] mx-auto px-4 py-3">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <Menu className="w-5 h-5 text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <Link href="/" className="w-full">
+                    <DropdownMenuLabel className="flex items-center gap-2 cursor-pointer hover:bg-gray-100">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+                        alt="贵贵 Logo"
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span className="text-sm">贵贵助手</span>
+                    </DropdownMenuLabel>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>我的</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    <span>新建对话</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>历史对话</DropdownMenuLabel>
+                  {conversations.map((conv) => (
+                    <DropdownMenuItem key={conv.id} className="flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      <span className="truncate">{conv.title}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative flex-1">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="在这里输入问题"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <Mic className="w-5 h-5 text-gray-400" />
+                </div>
+                <Button 
+                  onClick={handleSendMessage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
+                  variant="ghost"
+                >
+                  <Send className="w-5 h-5 text-gray-400" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Map Container */}
-      <div className="pt-12 pb-16 relative h-screen w-full">
-        <div className="relative w-full h-full">
-          {/* Map Background */}
-          <Image
-            src={`https://hebbkx1anhila5yf.public.blob.vercel-storage.com/5-3nHrTpivGpnOL4TvlfH0UX6O9xAU8i.png`}
-            alt="Huangguoshu Map"
-            layout="fill"
-            objectFit="contain"
-            className="select-none"
-          />
-
-          {/* Map Markers */}
-          {spots.map((spot) => (
-            <button
-              key={spot.id}
-              className={`absolute w-8 h-8 transform -translate-x-1/2 -translate-y-1/2 
-                ${selectedSpot === spot.id ? 'scale-110' : ''}`}
-              style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-              onClick={() => setSelectedSpot(spot.id)}
-            >
-              <div className="bg-white rounded-full p-1.5 shadow-lg">
-                {spot.type === 'waterfall' && <Star className="w-5 h-5 text-blue-500" />}
-                {spot.type === 'info' && <Info className="w-5 h-5 text-yellow-500" />}
-                {spot.type === 'entrance' && <Map className="w-5 h-5 text-green-500" />}
-                {spot.type === 'parking' && <Car className="w-5 h-5 text-gray-500" />}
-                {spot.type === 'pavilion' && <Tree className="w-5 h-5 text-green-700" />}
-                {spot.type === 'building' && <Home className="w-5 h-5 text-purple-500" />}
-                {spot.type === 'rest' && <Utensils className="w-5 h-5 text-red-500" />}
-              </div>
-              {selectedSpot === spot.id && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 bg-black bg-opacity-75 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                  {spot.name}
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <BottomNavigation currentPage="self-guided-tour" />
     </div>
   )
 }

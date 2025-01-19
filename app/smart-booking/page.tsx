@@ -1,202 +1,288 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Star, MessageCircle } from 'lucide-react'
+import { Menu, Mic, Send, Star, MessageCircle, PlusCircle, History, User, Check } from 'lucide-react'
 import Image from 'next/image'
-import { BottomNavigation } from '@/components/BottomNavigation'
-
-type Message = {
-  role: 'user' | 'assistant'
-  content: string
-}
+import Link from 'next/link'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function SmartBooking() {
-  const [chatMessages, setChatMessages] = useState<Message[]>([])
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([])
   const [inputMessage, setInputMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
+    { id: '1', title: '黄果树瀑布门票咨询' },
+    { id: '2', title: '贵阳住宿推荐' },
+  ])
+  const [selectedFavorites, setSelectedFavorites] = useState<string[]>([])
 
-  // 只滚动对话框
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
-    }
-  }
-
-  // 当消息更新时滚动到底部
-  useEffect(() => {
-    scrollToBottom()
-  }, [chatMessages])
-  
-  useEffect(() => {
-    setChatMessages([{
-      role: 'assistant',
-      content: '您好！我是您的智能订购助手。需要我帮您预订景点门票或酒店吗？'
-    }])
-  }, [])
-
-  const callQianwenAPI = async (messages: Message[]) => {
-    try {
-      const response = await fetch('/api/qianwen', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: '你是一个专业的贵州旅游产品订购助手，熟悉贵州的景点门票、酒店住宿等旅游产品。请为用户提供专业的咨询和订购建议。'
-            },
-            ...messages
-          ]
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('API 请求失败')
-      }
-      
-      const data = await response.json()
-      return data.response
-    } catch (error) {
-      console.error('调用通义千问API错误:', error)
-      return '抱歉，我现在无法回答。请稍后再试。'
-    }
-  }
-
-  const handleSendMessage = async () => {
-    if (inputMessage.trim() && !isLoading) {
-      setIsLoading(true)
-      const userMessage = { role: 'user', content: inputMessage }
-      setChatMessages(prev => [...prev, userMessage])
+  const handleSendMessage = () => {
+    if (inputMessage.trim()) {
+      setChatMessages([...chatMessages, { role: 'user', content: inputMessage }])
+      setTimeout(() => {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: `您说: ${inputMessage}` }])
+      }, 1000)
       setInputMessage('')
-
-      try {
-        const aiResponse = await callQianwenAPI([...chatMessages, userMessage])
-        setChatMessages(prev => [...prev, { role: 'assistant', content: aiResponse }])
-      } catch (error) {
-        console.error('发送消息错误:', error)
-        setChatMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: '抱歉，系统暂时无法回应，请稍后再试。' 
-        }])
-      } finally {
-        setIsLoading(false)
-      }
     }
   }
+
+  const quickQuestions = [
+    "订购小七孔的门票",
+    "明天去贵阳，订一晚市区性价比高的酒店",
+    "我在西江千户苗寨，帮我订一个好吃的酸汤鱼餐厅"
+  ]
+
+  const favorites = [
+    "黔南州小众3日轻松游",
+    "贵州5日常规游",
+    "小七孔景区",
+    "天泰酒店"
+  ]
+
+  const toggleFavorite = (favorite: string) => {
+    setSelectedFavorites(prev => 
+      prev.includes(favorite) 
+        ? prev.filter(f => f !== favorite)
+        : [...prev, favorite]
+    )
+  }
+
+  const categories = [
+    { id: 'tickets', name: '票务', color: 'bg-blue-500' },
+    { id: 'hotels', name: '酒店', color: 'bg-blue-500' },
+    { id: 'food', name: '美食', color: 'bg-purple-100 text-purple-600' },
+    { id: 'transport', name: '交通', color: 'bg-purple-100 text-purple-600' }
+  ]
+
+  const products = [
+    {
+      id: '1',
+      name: '黄果树瀑布景区门票',
+      price: 180,
+      originalPrice: 200,
+      rating: 4.8,
+      reviews: 2345,
+      image: '/placeholder.svg?height=200&width=200',
+      tag: '特惠'
+    },
+    {
+      id: '2',
+      name: '青岩古镇景区门票',
+      price: 120,
+      originalPrice: 150,
+      rating: 4.7,
+      reviews: 1890,
+      image: '/placeholder.svg?height=200&width=200',
+      tag: '热门'
+    },
+    {
+      id: '3',
+      name: '梵净山景区门票',
+      price: 160,
+      originalPrice: 180,
+      rating: 4.9,
+      reviews: 2156,
+      image: '/placeholder.svg?height=200&width=200',
+      tag: '推荐'
+    },
+    {
+      id: '4',
+      name: '西江千户苗寨门票',
+      price: 140,
+      originalPrice: 160,
+      rating: 4.6,
+      reviews: 1678,
+      image: '/placeholder.svg?height=200&width=200',
+      tag: '热卖'
+    }
+  ]
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-3xl mx-auto p-4 pb-12">
-      <h1 className="text-2xl font-bold mb-4">智能订购</h1>
-      
-      {/* 智能对话界面 */}
-      <Card className="mb-6 p-4">
-        <div ref={chatContainerRef} className="h-64 overflow-y-auto mb-4">
-          {chatMessages.map((msg, index) => (
-            <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <span className={`inline-block p-2 rounded-lg ${
-                msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'
-              }`}>
-                {msg.content}
-              </span>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-[414px] mx-auto bg-white min-h-screen">
+        {/* AI Assistant Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center gap-3">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/95f5a967a223392503b93d8b8942eb4-QD80D9i3vTRnsXEovEKDy3APBXCHJK.png"
+              alt="AI Assistant"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+            <div>
+              <p className="text-sm font-medium">智能订购小助手</p>
+              <p className="text-xs text-gray-500">提供快速订票、订酒店，一站式采购下单</p>
             </div>
+          </div>
+        </div>
+
+        {/* Preset Questions */}
+        <Card className="mx-4 my-4">
+          <CardContent className="p-4">
+            <ul className="space-y-2">
+              {quickQuestions.map((question, index) => (
+                <li key={index} className="text-xs text-black cursor-pointer hover:underline">
+                  {question}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        {/* My Favorites */}
+        <div className="mx-4 mb-6">
+          <h2 className="text-lg font-semibold mb-2">我的收藏</h2>
+          <div className="flex flex-wrap gap-2">
+            {favorites.map((favorite, index) => (
+              <Badge
+                key={index}
+                variant={selectedFavorites.includes(favorite) ? "default" : "secondary"}
+                className="cursor-pointer flex items-center gap-1"
+                onClick={() => toggleFavorite(favorite)}
+              >
+                {favorite}
+                {selectedFavorites.includes(favorite) && <Check className="w-3 h-3" />}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Buttons */}
+        <div className="px-4 grid grid-cols-4 gap-3 mb-6">
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              className={`${category.color} ${
+                category.id === 'food' || category.id === 'transport' 
+                  ? 'text-purple-600 bg-purple-100 border-purple-100' 
+                  : 'text-white'
+              } h-auto py-3 text-sm`}
+              variant={category.id === 'food' || category.id === 'transport' ? 'outline' : 'default'}
+            >
+              {category.name}
+            </Button>
           ))}
         </div>
-        <div className="flex gap-2">
-          <Input
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="订个酒店、找个门票、比个价格..."
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            disabled={isLoading}
-          />
-          <Button 
-            onClick={handleSendMessage}
-            disabled={isLoading}
-          >
-            {isLoading ? '发送中...' : '发送'}
-          </Button>
+
+
+        {/* Hot Recommendations */}
+        <div className="px-4">
+          <h2 className="text-lg font-bold mb-4">热门推荐</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {products.map((product) => (
+              <Card key={product.id} className="overflow-hidden">
+                <div className="relative">
+                  <Image
+                    src={product.image || "/placeholder.svg"}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="w-full aspect-square object-cover"
+                  />
+                  <Badge className="absolute top-2 left-2 bg-blue-500">
+                    {product.tag}
+                  </Badge>
+                </div>
+                <div className="p-2">
+                  <h3 className="text-sm font-medium line-clamp-2 mb-1">{product.name}</h3>
+                  <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span>{product.rating}</span>
+                    <span>·</span>
+                    <span>{product.reviews}条评论</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-lg font-bold text-red-500">¥{product.price}</span>
+                      <span className="text-xs text-gray-400 line-through">¥{product.originalPrice}</span>
+                    </div>
+                    <Button size="sm" className="text-xs px-2 py-1">
+                      预订
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
-      </Card>
-      
-      {/* 产品展示部分保持不变 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {products.map((product, index) => (
-          <Card key={index} className="overflow-hidden">
-            <div className="relative h-48">
-              <Image
-                src={product.image || "/placeholder.svg"}
-                alt={product.name}
-                layout="fill"
-                objectFit="cover"
-              />
-              <Badge className="absolute top-2 left-2 bg-blue-500">{product.type}</Badge>
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-              <div className="flex items-center mb-2">
-                <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                <span>{product.rating}</span>
-                <span className="mx-2">•</span>
-                <MessageCircle className="w-4 h-4 text-gray-400 mr-1" />
-                <span>{product.reviews} 条评论</span>
+
+        {/* Chat Interface */}
+        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 bg-[#F8F8F8] w-full max-w-[414px]">
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <Menu className="w-5 h-5 text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <Link href="/" className="w-full">
+                    <DropdownMenuLabel className="flex items-center gap-2 cursor-pointer hover:bg-gray-100">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/fe6932720fda997c3b514dd58df8362.jpg-2qwI8qmiqjugdlHJenUS9UU4ilVGNb.jpeg"
+                        alt="贵贵 Logo"
+                        width={24}
+                        height={24}
+                        className="rounded-full"
+                      />
+                      <span className="text-sm">贵贵助手</span>
+                    </DropdownMenuLabel>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span>我的</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <PlusCircle className="w-4 h-4" />
+                    <span>新建对话</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>历史对话</DropdownMenuLabel>
+                  {conversations.map((conv) => (
+                    <DropdownMenuItem key={conv.id} className="flex items-center gap-2">
+                      <History className="w-4 h-4" />
+                      <span className="truncate">{conv.title}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="relative flex-1">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder="在这里输入问题"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <Mic className="w-5 h-5 text-gray-400" />
+                </div>
+                <Button 
+                  onClick={handleSendMessage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
+                  variant="ghost"
+                >
+                  <Send className="w-5 h-5 text-gray-400" />
+                </Button>
               </div>
-              <p className="text-gray-600 mb-2">{product.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-bold text-red-500">¥{product.price}</span>
-                <Button>立即预订</Button>
-              </div>
             </div>
-          </Card>
-        ))}
+          </div>
+        </div>
       </div>
-      <BottomNavigation currentPage="smart-booking" />
     </div>
   )
 }
-
-const products = [
-  {
-    name: "黄果树瀑布景区门票",
-    type: "门票",
-    image: "/placeholder.svg?height=300&width=400",
-    rating: 4.8,
-    reviews: 2345,
-    description: "世界最大的瀑布群，壮观的自然奇观",
-    price: 180
-  },
-  {
-    name: "小七孔景区门票",
-    type: "门票",
-    image: "/placeholder.svg?height=300&width=400",
-    rating: 4.7,
-    reviews: 1890,
-    description: "贵州最美的喀斯特地貌，山水画卷",
-    price: 150
-  },
-  {
-    name: "贵阳安纳塔拉度假酒店",
-    type: "酒店",
-    image: "/placeholder.svg?height=300&width=400",
-    rating: 4.9,
-    reviews: 1256,
-    description: "奢华五星级度假酒店，尽享贵阳山城美景",
-    price: 888
-  },
-  {
-    name: "贵阳喜来登贵航酒店",
-    type: "酒店",
-    image: "/placeholder.svg?height=300&width=400",
-    rating: 4.6,
-    reviews: 2078,
-    description: "位于市中心的商务酒店，交通便利",
-    price: 668
-  }
-]
 
