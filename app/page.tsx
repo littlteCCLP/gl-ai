@@ -14,7 +14,7 @@ export default function AiAssistant() {
   const [showProfileEdit, setShowProfileEdit] = useState(false)
   const [inputMessage, setInputMessage] = useState('')
   const [userProfile, setUserProfile] = useState({
-    nickname: '瑞雪123',
+    nickname: '瑞雪',
     avatarUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/95f5a967a223392503b93d8b8942eb4-QD80D9i3vTRnsXEovEKDy3APBXCHJK.png',
   })
 
