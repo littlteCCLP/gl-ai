@@ -1,14 +1,13 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { ChevronDown, ChevronUp, Mic, Send, Menu, PlusCircle, History, User, Compass } from 'lucide-react'
-import { 
+import { ChevronDown, ChevronUp, Mic, Send, Menu, PlusCircle, History, User, Compass } from "lucide-react"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,48 +15,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Image from 'next/image'
-import Link from 'next/link'
-import { TravelCategories } from '@/components/TravelCategories'
+import Image from "next/image"
+import Link from "next/link"
+import { TravelCategories } from "@/components/TravelCategories"
 
 export default function TravelPlanning() {
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([])
-  const [inputMessage, setInputMessage] = useState('')
-  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
-    { id: '1', title: '贵州三日游规划' },
-    { id: '2', title: '黄果树瀑布一日游' },
-  ])
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([])
+  const [inputMessage, setInputMessage] = useState("")
   const [showCategories, setShowCategories] = useState(false)
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
+    { id: "1", title: "贵州三日游规划" },
+    { id: "2", title: "黄果树瀑布一日游" },
+  ])
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
-      setChatMessages([...chatMessages, { role: 'user', content: inputMessage }])
+      setChatMessages([...chatMessages, { role: "user", content: inputMessage }])
       setTimeout(() => {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: `You said: ${inputMessage}` }])
+        setChatMessages((prev) => [...prev, { role: "assistant", content: `You said: ${inputMessage}` }])
       }, 1000)
-      setInputMessage('')
+      setInputMessage("")
     }
   }
 
   const initialQuestions = [
-    {
-      icon: <div className="w-12 h-6 flex items-center justify-center" style={{ fontFamily: 'STKaiti, STSong, SimSun, serif' }}>
-        <span className="text-blue-600 font-bold text-xs">目的地</span>
-      </div>,
-      question: "想去贵州玩，帮我规划一下行程？",
-    },
-    {
-      icon: <div className="w-12 h-6 flex items-center justify-center" style={{ fontFamily: 'STKaiti, STSong, SimSun, serif' }}>
-        <span className="text-green-600 font-bold text-xs">预算</span>
-      </div>,
-      question: "想去一次贵州，预算5000元，能怎么玩？",
-    },
-    {
-      icon: <div className="w-12 h-6 flex items-center justify-center" style={{ fontFamily: 'STKaiti, STSong, SimSun, serif' }}>
-        <span className="text-red-600 font-bold text-xs">时间</span>
-      </div>,
-      question: "想春节去贵州玩，建议行程安排几天比较合适？",
-    }
+    "想去贵州玩，帮我规划一下行程？",
+    "想去一次贵州，预算5000元，能怎么玩？",
+    "想春节去贵州玩，建议行程安排几天比较合适？",
   ]
 
   return (
@@ -74,112 +58,94 @@ export default function TravelPlanning() {
               className="rounded-full object-cover"
             />
           </div>
-          <h1 className="text-lg font-bold mb-1">欢迎使用旅游规划助手</h1>
-          <p className="text-xs text-gray-600">让我们一起规划您的完美旅程！</p>
+          <h1 className="text-lg font-bold mb-1">欢迎使用旅游规划</h1>
+          {/* <p className="text-xs text-gray-600">让我们一起规划您的完美旅程！</p> */}
         </div>
 
         {/* Travel Preferences */}
-        <Card className="mb-4 p-3 transition-all duration-300">
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="destination" className="text-xs mb-1">
+        <Card className="mb-4">
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="destination" className="text-xs">
                   目的地
                 </Label>
-                <Input id="destination" placeholder="输入目的地" className="text-xs" />
+                <Input id="destination" placeholder="输入目的地" className="w-full" />
               </div>
-              
-              <div>
-                <Label htmlFor="theme" className="text-xs mb-1">
+              <div className="space-y-1">
+                <Label htmlFor="theme" className="text-xs">
                   游玩主题
                 </Label>
                 <Select>
-                  <SelectTrigger id="theme" className="text-xs">
+                  <SelectTrigger id="theme">
                     <SelectValue placeholder="选择主题" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nature" className="text-xs">自然观光</SelectItem>
-                    <SelectItem value="culture" className="text-xs">人文历史</SelectItem>
-                    <SelectItem value="leisure" className="text-xs">休闲体验</SelectItem>
-                    <SelectItem value="adventure" className="text-xs">探险刺激</SelectItem>
+                    <SelectItem value="nature">自然观光</SelectItem>
+                    <SelectItem value="culture">人文历史</SelectItem>
+                    <SelectItem value="food">美食体验</SelectItem>
+                    <SelectItem value="adventure">户外冒险</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="duration" className="text-xs mb-1">
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="duration" className="text-xs">
                   游玩时间
                 </Label>
                 <Select>
-                  <SelectTrigger id="duration" className="text-xs">
+                  <SelectTrigger id="duration">
                     <SelectValue placeholder="选择时间" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1-3" className="text-xs">1-3天</SelectItem>
-                    <SelectItem value="4-7" className="text-xs">4-7天</SelectItem>
-                    <SelectItem value="7+" className="text-xs">7天以上</SelectItem>
+                    <SelectItem value="1-3">1-3天</SelectItem>
+                    <SelectItem value="4-7">4-7天</SelectItem>
+                    <SelectItem value="7+">7天以上</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div>
-                <Label htmlFor="transport" className="text-xs mb-1">
+              <div className="space-y-1">
+                <Label htmlFor="transport" className="text-xs">
                   交通方式
                 </Label>
                 <Select>
-                  <SelectTrigger id="transport" className="text-xs">
+                  <SelectTrigger id="transport">
                     <SelectValue placeholder="选择交通方式" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="car" className="text-xs">自驾</SelectItem>
-                    <SelectItem value="public" className="text-xs">公共交通</SelectItem>
-                    <SelectItem value="tour" className="text-xs">跟团</SelectItem>
+                    <SelectItem value="car">自驾</SelectItem>
+                    <SelectItem value="public">公共交通</SelectItem>
+                    <SelectItem value="tour">跟团</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            
-            <div>
-              <Label htmlFor="budget" className="text-xs mb-1">
-                预算 (元)
+
+            <div className="space-y-1">
+              <Label htmlFor="budget" className="text-xs">
+                预算 (元)/人
               </Label>
               <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  defaultValue={0}
-                  min={0}
-                  className="text-xs"
-                />
+                <Input type="number" placeholder="0" defaultValue={0} min={0} id="budget-min" className="w-1/2" />
                 <span className="text-xs">至</span>
-                <Input
-                  type="number"
-                  placeholder="2000"
-                  defaultValue={2000}
-                  min={0}
-                  className="text-xs"
-                />
+                <Input type="number" placeholder="2000" defaultValue={2000} min={0} id="budget-max" className="w-1/2" />
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
 
         {/* Initial Questions */}
         <Card className="mb-3 bg-white border border-gray-200">
-          <CardContent className="p-2 space-y-0 divide-y divide-gray-200">
-            {initialQuestions.map((q, index) => (
-              <div 
-                key={index} 
-                className="flex items-center gap-2 py-2 hover:bg-gray-50 transition-all cursor-pointer"
-              >
-                <div className="flex-shrink-0">
-                  {q.icon}
-                </div>
-                <span className="text-xs text-gray-700">{q.question}</span>
-              </div>
-            ))}
+          <CardContent className="p-4">
+            <ul className="space-y-2">
+              {initialQuestions.map((q, index) => (
+                <li key={index} className="text-sm text-black cursor-pointer hover:bg-gray-50 transition-all py-2">
+                  {q}
+                </li>
+              ))}
+            </ul>
           </CardContent>
           <div className="p-2">
             <Button
@@ -252,13 +218,13 @@ export default function TravelPlanning() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="在这里输入问题"
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200 bg-blue-50"
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <Mic className="w-5 h-5 text-gray-400" />
               </div>
-              <Button 
+              <Button
                 onClick={handleSendMessage}
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
                 variant="ghost"

@@ -1,97 +1,103 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Camera, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Camera, X, ChevronDown, ChevronUp } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { motion, AnimatePresence } from "framer-motion"
 
 const travelTags = [
-  { id: '1', label: '自然景观' },
-  { id: '2', label: '民俗文化' },
-  { id: '3', label: '户外运动' },
-  { id: '4', label: '地理研究' },
-  { id: '5', label: '美食探索' },
-  { id: '6', label: '摄影爱好者' },
-  { id: '7', label: '历史文化' },
-  { id: '8', label: '建筑艺术' },
+  { id: "1", label: "自然景观" },
+  { id: "2", label: "民俗文化" },
+  { id: "3", label: "户外运动" },
+  { id: "4", label: "地理研究" },
+  { id: "5", label: "美食探索" },
+  { id: "6", label: "摄影爱好者" },
+  { id: "7", label: "历史文化" },
+  { id: "8", label: "建筑艺术" },
 ]
 
 const occupationTags = [
-  { id: 'o1', label: '学生' },
-  { id: 'o2', label: '教师' },
-  { id: 'o3', label: '工程师' },
-  { id: 'o4', label: '医生' },
-  { id: 'o5', label: '商人' },
-  { id: 'o6', label: '艺术家' },
-  { id: 'o7', label: '自由职业者' },
-  { id: 'o8', label: '程序员' },
-  { id: 'o9', label: '设计师' },
-  { id: 'o10', label: '律师' },
-  { id: 'o11', label: '会计' },
-  { id: 'o12', label: '销售' },
-  { id: 'o13', label: '管理人员' },
-  { id: 'o14', label: '研究员' },
-  { id: 'o15', label: '其他' },
+  { id: "o1", label: "学生" },
+  { id: "o2", label: "教师" },
+  { id: "o3", label: "工程师" },
+  { id: "o4", label: "医生" },
+  { id: "o5", label: "商人" },
+  { id: "o6", label: "艺术家" },
+  { id: "o7", label: "自由职业者" },
+  { id: "o8", label: "程序员" },
+  { id: "o9", label: "设计师" },
+  { id: "o10", label: "律师" },
+  { id: "o11", label: "会计" },
+  { id: "o12", label: "销售" },
+  { id: "o13", label: "管理人员" },
+  { id: "o14", label: "研究员" },
+  { id: "o15", label: "其他" },
 ]
 
 const interestTags = [
-  { id: 'i1', label: '阅读' },
-  { id: 'i2', label: '运动' },
-  { id: 'i3', label: '烹饪' },
-  { id: 'i4', label: '旅行' },
-  { id: 'i5', label: '摄影' },
-  { id: 'i6', label: '音乐' },
-  { id: 'i7', label: '电影' },
-  { id: 'i8', label: '艺术' },
+  { id: "i1", label: "阅读" },
+  { id: "i2", label: "运动" },
+  { id: "i3", label: "烹饪" },
+  { id: "i4", label: "旅行" },
+  { id: "i5", label: "摄影" },
+  { id: "i6", label: "音乐" },
+  { id: "i7", label: "电影" },
+  { id: "i8", label: "艺术" },
 ]
 
-const musicTags = [
-  { id: 'm1', label: '流行' },
-  { id: 'm2', label: '摇滚' },
-  { id: 'm3', label: '古典' },
-  { id: 'm4', label: '爵士' },
-  { id: 'm5', label: '电子' },
-  { id: 'm6', label: '民谣' },
-  { id: 'm7', label: '嘻哈' },
-  { id: 'm8', label: '其他' },
+const additionalInfoTags = [
+  { id: "ai1", label: "已婚" },
+  { id: "ai2", label: "未婚" },
+  { id: "ai3", label: "离异" },
+  { id: "ai4", label: "1个小孩" },
+  { id: "ai5", label: "2个小孩" },
+  { id: "ai6", label: "父母健在" },
+  { id: "ai7", label: "父母60岁以上" },
 ]
 
 export function UserProfileEdit({ onClose }: { onClose: () => void }) {
   const [userProfile, setUserProfile] = useState({
-    nickname: '瑞雪',
-    avatarUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/95f5a967a223392503b93d8b8942eb4-QD80D9i3vTRnsXEovEKDy3APBXCHJK.png',
+    nickname: "瑞雪",
+    avatarUrl:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/95f5a967a223392503b93d8b8942eb4-QD80D9i3vTRnsXEovEKDy3APBXCHJK.png",
     selectedTags: [] as string[],
-    age: '',
-    gender: '',
+    age: "",
+    gender: "",
+    permanentResidence: "",
     selectedOccupationTags: [] as string[],
     selectedInterestTags: [] as string[],
-    selectedMusicTags: [] as string[],
+    allowCookiesAccess: false,
+    selectedAdditionalInfoTags: [] as string[],
   })
   const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
-    const savedProfile = localStorage.getItem('userProfile')
+    const savedProfile = localStorage.getItem("userProfile")
     if (savedProfile) {
       setUserProfile(JSON.parse(savedProfile))
     }
   }, [])
 
-  const handleTagToggle = (tagId: string, tagType: 'travel' | 'occupation' | 'interest' | 'music') => {
-    setUserProfile(prev => {
-      const key = tagType === 'travel' ? 'selectedTags' :
-                  tagType === 'occupation' ? 'selectedOccupationTags' :
-                  tagType === 'interest' ? 'selectedInterestTags' : 'selectedMusicTags'
+  const handleTagToggle = (tagId: string, tagType: "travel" | "occupation" | "interest" | "additionalInfo") => {
+    setUserProfile((prev) => {
+      const key =
+        tagType === "travel"
+          ? "selectedTags"
+          : tagType === "occupation"
+            ? "selectedOccupationTags"
+            : tagType === "interest"
+              ? "selectedInterestTags"
+              : "selectedAdditionalInfoTags"
       return {
         ...prev,
-        [key]: prev[key].includes(tagId)
-          ? prev[key].filter(id => id !== tagId)
-          : [...prev[key], tagId]
+        [key]: prev[key].includes(tagId) ? prev[key].filter((id) => id !== tagId) : [...prev[key], tagId],
       }
     })
   }
@@ -100,12 +106,12 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
     const file = e.target.files?.[0]
     if (file) {
       const url = URL.createObjectURL(file)
-      setUserProfile(prev => ({ ...prev, avatarUrl: url }))
+      setUserProfile((prev) => ({ ...prev, avatarUrl: url }))
     }
   }
 
   const handleSave = () => {
-    localStorage.setItem('userProfile', JSON.stringify(userProfile))
+    localStorage.setItem("userProfile", JSON.stringify(userProfile))
     onClose()
   }
 
@@ -123,7 +129,7 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
             <X className="h-5 w-5" />
           </Button>
         </div>
-        
+
         <div className="p-6 space-y-8">
           <div className="flex flex-col items-center">
             <div className="relative group">
@@ -131,21 +137,15 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
                 <AvatarImage src={userProfile.avatarUrl} alt={userProfile.nickname} />
                 <AvatarFallback>{userProfile.nickname[0]}</AvatarFallback>
               </Avatar>
-              <label 
-                htmlFor="avatar-upload" 
+              <label
+                htmlFor="avatar-upload"
                 className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full cursor-pointer hover:bg-blue-600 transition-colors shadow-md"
               >
                 <Camera className="w-5 h-5 text-white" />
               </label>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
+              <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             </div>
-            
+
             <div className="w-full mt-6">
               <Label htmlFor="nickname" className="text-xs font-medium text-gray-700">
                 昵称
@@ -153,7 +153,7 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
               <Input
                 id="nickname"
                 value={userProfile.nickname}
-                onChange={(e) => setUserProfile(prev => ({ ...prev, nickname: e.target.value }))}
+                onChange={(e) => setUserProfile((prev) => ({ ...prev, nickname: e.target.value }))}
                 className="mt-1.5"
               />
             </div>
@@ -167,7 +167,7 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
               <Input
                 id="age"
                 value={userProfile.age}
-                onChange={(e) => setUserProfile(prev => ({ ...prev, age: e.target.value }))}
+                onChange={(e) => setUserProfile((prev) => ({ ...prev, age: e.target.value }))}
                 className="mt-1.5"
                 type="number"
               />
@@ -176,9 +176,9 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
               <Label htmlFor="gender" className="text-xs font-medium text-gray-700">
                 性别
               </Label>
-              <Select 
-                value={userProfile.gender} 
-                onValueChange={(value) => setUserProfile(prev => ({ ...prev, gender: value }))}
+              <Select
+                value={userProfile.gender}
+                onValueChange={(value) => setUserProfile((prev) => ({ ...prev, gender: value }))}
               >
                 <SelectTrigger id="gender" className="mt-1.5">
                   <SelectValue placeholder="选择性别" />
@@ -192,16 +192,27 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <Label className="text-xs font-medium text-gray-700">
-              标签（可多选）
+            <Label htmlFor="permanentResidence" className="text-xs font-medium text-gray-700">
+              常住地
             </Label>
+            <Input
+              id="permanentResidence"
+              value={userProfile.permanentResidence}
+              onChange={(e) => setUserProfile((prev) => ({ ...prev, permanentResidence: e.target.value }))}
+              className="mt-1.5"
+              placeholder="请输入您的常住地"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-gray-700">标签（可多选）</Label>
             <div className="flex flex-wrap gap-2 mt-2">
               {travelTags.map((tag) => (
                 <Badge
                   key={tag.id}
                   variant={userProfile.selectedTags.includes(tag.id) ? "default" : "outline"}
                   className="cursor-pointer py-1 px-2 text-xs transition-all hover:shadow-md"
-                  onClick={() => handleTagToggle(tag.id, 'travel')}
+                  onClick={() => handleTagToggle(tag.id, "travel")}
                 >
                   {tag.label}
                 </Badge>
@@ -214,11 +225,10 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
               className="flex items-center justify-between w-full text-left text-lg font-semibold text-gray-800 hover:text-blue-600 transition-colors"
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              <span className="text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors">信息完善</span>
-              <motion.div
-                animate={{ rotate: isExpanded ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
+              <span className="text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors">
+                信息完善
+              </span>
+              <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.3 }}>
                 <ChevronDown className="w-5 h-5" />
               </motion.div>
             </button>
@@ -232,16 +242,14 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
                   className="mt-4 space-y-6 overflow-hidden"
                 >
                   <div>
-                    <Label className="text-xs font-medium text-gray-700">
-                      职业
-                    </Label>
+                    <Label className="text-xs font-medium text-gray-700">职业</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {occupationTags.map((tag) => (
                         <Badge
                           key={tag.id}
                           variant={userProfile.selectedOccupationTags.includes(tag.id) ? "default" : "outline"}
                           className="cursor-pointer py-1 px-2 text-xs transition-all hover:shadow-md"
-                          onClick={() => handleTagToggle(tag.id, 'occupation')}
+                          onClick={() => handleTagToggle(tag.id, "occupation")}
                         >
                           {tag.label}
                         </Badge>
@@ -249,16 +257,14 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-gray-700">
-                      兴趣爱好
-                    </Label>
+                    <Label className="text-xs font-medium text-gray-700">兴趣爱好</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {interestTags.map((tag) => (
                         <Badge
                           key={tag.id}
                           variant={userProfile.selectedInterestTags.includes(tag.id) ? "default" : "outline"}
                           className="cursor-pointer py-1 px-2 text-xs transition-all hover:shadow-md"
-                          onClick={() => handleTagToggle(tag.id, 'interest')}
+                          onClick={() => handleTagToggle(tag.id, "interest")}
                         >
                           {tag.label}
                         </Badge>
@@ -266,16 +272,14 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-gray-700">
-                      音乐偏好
-                    </Label>
+                    <Label className="text-xs font-medium text-gray-700">更多信息</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {musicTags.map((tag) => (
+                      {additionalInfoTags.map((tag) => (
                         <Badge
                           key={tag.id}
-                          variant={userProfile.selectedMusicTags.includes(tag.id) ? "default" : "outline"}
+                          variant={userProfile.selectedAdditionalInfoTags.includes(tag.id) ? "default" : "outline"}
                           className="cursor-pointer py-1 px-2 text-xs transition-all hover:shadow-md"
-                          onClick={() => handleTagToggle(tag.id, 'music')}
+                          onClick={() => handleTagToggle(tag.id, "additionalInfo")}
                         >
                           {tag.label}
                         </Badge>
@@ -287,7 +291,21 @@ export function UserProfileEdit({ onClose }: { onClose: () => void }) {
             </AnimatePresence>
           </div>
 
-          <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white" onClick={handleSave}>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="allow-cookies" className="text-sm font-medium text-gray-700">
+              是否允许访问您的手机cookies
+            </Label>
+            <Switch
+              id="allow-cookies"
+              checked={userProfile.allowCookiesAccess}
+              onCheckedChange={(checked) => setUserProfile((prev) => ({ ...prev, allowCookiesAccess: checked }))}
+            />
+          </div>
+
+          <Button
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+            onClick={handleSave}
+          >
             保存设置
           </Button>
         </div>

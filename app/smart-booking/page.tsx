@@ -1,14 +1,27 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Menu, Mic, Send, Star, MessageCircle, PlusCircle, History, User, Check } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { 
+import {
+  Menu,
+  Mic,
+  Send,
+  Star,
+  MessageCircle,
+  PlusCircle,
+  History,
+  User,
+  MapPin,
+  CalendarDays,
+  Building,
+  Bookmark,
+} from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,93 +31,77 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function SmartBooking() {
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([])
-  const [inputMessage, setInputMessage] = useState('')
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([])
+  const [inputMessage, setInputMessage] = useState("")
   const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
-    { id: '1', title: '黄果树瀑布门票咨询' },
-    { id: '2', title: '贵阳住宿推荐' },
+    { id: "1", title: "黄果树瀑布门票咨询" },
+    { id: "2", title: "贵阳住宿推荐" },
   ])
-  const [selectedFavorites, setSelectedFavorites] = useState<string[]>([])
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
-      setChatMessages([...chatMessages, { role: 'user', content: inputMessage }])
+      setChatMessages([...chatMessages, { role: "user", content: inputMessage }])
       setTimeout(() => {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: `您说: ${inputMessage}` }])
+        setChatMessages((prev) => [...prev, { role: "assistant", content: `您说: ${inputMessage}` }])
       }, 1000)
-      setInputMessage('')
+      setInputMessage("")
     }
   }
 
   const quickQuestions = [
-    "订购小七孔的门票",
-    "明天去贵阳，订一晚市区性价比高的酒店",
-    "我在西江千户苗寨，帮我订一个好吃的酸汤鱼餐厅"
+    "订购小七孔的门票！",
+    "明天去贵阳，订一晚市区性价比高的酒店！",
+    "我在西江千户苗寨，帮我订一个好吃的酸汤鱼餐厅！",
   ]
-
-  const favorites = [
-    "黔南州小众3日轻松游",
-    "贵州5日常规游",
-    "小七孔景区",
-    "天泰酒店"
-  ]
-
-  const toggleFavorite = (favorite: string) => {
-    setSelectedFavorites(prev => 
-      prev.includes(favorite) 
-        ? prev.filter(f => f !== favorite)
-        : [...prev, favorite]
-    )
-  }
 
   const categories = [
-    { id: 'tickets', name: '票务', color: 'bg-blue-500' },
-    { id: 'hotels', name: '酒店', color: 'bg-blue-500' },
-    { id: 'food', name: '美食', color: 'bg-purple-100 text-purple-600' },
-    { id: 'transport', name: '交通', color: 'bg-purple-100 text-purple-600' }
+    { id: "attractions", name: "景区", color: "bg-blue-500 bg-opacity-50", icon: <MapPin className="w-4 h-4" /> },
+    { id: "activities", name: "活动", color: "bg-green-500 bg-opacity-50", icon: <CalendarDays className="w-4 h-4" /> },
+    { id: "accommodation", name: "住宿", color: "bg-purple-500 bg-opacity-50", icon: <Building className="w-4 h-4" /> },
+    { id: "favorites", name: "收藏", color: "bg-red-500 bg-opacity-50", icon: <Bookmark className="w-4 h-4" /> },
   ]
 
   const products = [
     {
-      id: '1',
-      name: '黄果树瀑布景区门票',
+      id: "1",
+      name: "黄果树瀑布景区门票",
       price: 180,
       originalPrice: 200,
       rating: 4.8,
       reviews: 2345,
-      image: '/placeholder.svg?height=200&width=200',
-      tag: '特惠'
+      image: "/placeholder.svg?height=200&width=200",
+      tag: "特惠",
     },
     {
-      id: '2',
-      name: '青岩古镇景区门票',
+      id: "2",
+      name: "青岩古镇景区门票",
       price: 120,
       originalPrice: 150,
       rating: 4.7,
       reviews: 1890,
-      image: '/placeholder.svg?height=200&width=200',
-      tag: '热门'
+      image: "/placeholder.svg?height=200&width=200",
+      tag: "热门",
     },
     {
-      id: '3',
-      name: '梵净山景区门票',
+      id: "3",
+      name: "梵净山景区门票",
       price: 160,
       originalPrice: 180,
       rating: 4.9,
       reviews: 2156,
-      image: '/placeholder.svg?height=200&width=200',
-      tag: '推荐'
+      image: "/placeholder.svg?height=200&width=200",
+      tag: "推荐",
     },
     {
-      id: '4',
-      name: '西江千户苗寨门票',
+      id: "4",
+      name: "西江千户苗寨门票",
       price: 140,
       originalPrice: 160,
       rating: 4.6,
       reviews: 1678,
-      image: '/placeholder.svg?height=200&width=200',
-      tag: '热卖'
-    }
+      image: "/placeholder.svg?height=200&width=200",
+      tag: "热卖",
+    },
   ]
 
   return (
@@ -130,9 +127,10 @@ export default function SmartBooking() {
         {/* Preset Questions */}
         <Card className="mx-4 my-4">
           <CardContent className="p-4">
-            <ul className="space-y-2">
+            <ul className="space-y-2 divide-y divide-gray-200">
               {quickQuestions.map((question, index) => (
-                <li key={index} className="text-xs text-black cursor-pointer hover:underline">
+                <li key={index} className="flex items-center py-2 text-xs text-black cursor-pointer hover:underline">
+                  <div className="w-2 h-2 bg-black rounded-full mr-2 flex-shrink-0"></div>
                   {question}
                 </li>
               ))}
@@ -140,41 +138,19 @@ export default function SmartBooking() {
           </CardContent>
         </Card>
 
-        {/* My Favorites */}
-        <div className="mx-4 mb-6">
-          <h2 className="text-lg font-semibold mb-2">我的收藏</h2>
-          <div className="flex flex-wrap gap-2">
-            {favorites.map((favorite, index) => (
-              <Badge
-                key={index}
-                variant={selectedFavorites.includes(favorite) ? "default" : "secondary"}
-                className="cursor-pointer flex items-center gap-1"
-                onClick={() => toggleFavorite(favorite)}
-              >
-                {favorite}
-                {selectedFavorites.includes(favorite) && <Check className="w-3 h-3" />}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
         {/* Category Buttons */}
         <div className="px-4 grid grid-cols-4 gap-3 mb-6">
           {categories.map((category) => (
             <Button
               key={category.id}
-              className={`${category.color} ${
-                category.id === 'food' || category.id === 'transport' 
-                  ? 'text-purple-600 bg-purple-100 border-purple-100' 
-                  : 'text-white'
-              } h-auto py-3 text-sm`}
-              variant={category.id === 'food' || category.id === 'transport' ? 'outline' : 'default'}
+              className={`${category.color} text-white h-auto py-3 text-sm flex flex-col items-center`}
+              variant="default"
             >
-              {category.name}
+              {category.icon}
+              <span className="mt-1">{category.name}</span>
             </Button>
           ))}
         </div>
-
 
         {/* Hot Recommendations */}
         <div className="px-4">
@@ -190,9 +166,7 @@ export default function SmartBooking() {
                     height={200}
                     className="w-full aspect-square object-cover"
                   />
-                  <Badge className="absolute top-2 left-2 bg-blue-500">
-                    {product.tag}
-                  </Badge>
+                  <Badge className="absolute top-2 left-2 bg-blue-500">{product.tag}</Badge>
                 </div>
                 <div className="p-2">
                   <h3 className="text-sm font-medium line-clamp-2 mb-1">{product.name}</h3>
@@ -207,7 +181,7 @@ export default function SmartBooking() {
                       <span className="text-lg font-bold text-red-500">¥{product.price}</span>
                       <span className="text-xs text-gray-400 line-through">¥{product.originalPrice}</span>
                     </div>
-                    <Button size="sm" className="text-xs px-2 py-1">
+                    <Button size="sm" className="text-xs px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-black">
                       预订
                     </Button>
                   </div>
@@ -218,7 +192,7 @@ export default function SmartBooking() {
         </div>
 
         {/* Chat Interface */}
-        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 bg-[#F8F8F8] w-full max-w-[414px]">
+        <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 bg-blue-50 w-full max-w-[414px]">
           <div className="px-4 py-3">
             <div className="flex items-center gap-2">
               <DropdownMenu>
@@ -264,13 +238,13 @@ export default function SmartBooking() {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="在这里输入问题"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                   <Mic className="w-5 h-5 text-gray-400" />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSendMessage}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
                   variant="ghost"

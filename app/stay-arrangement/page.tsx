@@ -1,26 +1,34 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Menu, Mic, Send, PlusCircle, History, User, ChevronDown, ChevronUp } from 'lucide-react'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Image from 'next/image'
-import Link from 'next/link'
-import { 
-DropdownMenu,
-DropdownMenuContent,
-DropdownMenuItem,
-DropdownMenuLabel,
-DropdownMenuSeparator,
-DropdownMenuTrigger,
+import { Menu, Mic, Send, PlusCircle, History, User, ChevronDown, ChevronUp } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import Image from "next/image"
+import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
 export default function StayArrangement() {
-  const [inputMessage, setInputMessage] = useState('')
+  const [inputMessage, setInputMessage] = useState("")
   const [selectedDays, setSelectedDays] = useState([30])
   const [selectedDestinations, setSelectedDestinations] = useState<string[]>([])
   const [selectedAccommodation, setSelectedAccommodation] = useState<string[]>([])
@@ -28,45 +36,39 @@ export default function StayArrangement() {
   const [selectedThemes, setSelectedThemes] = useState<string[]>([])
   const [companions, setCompanions] = useState(1)
   const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
-    { id: '1', title: '贵州三日游规划' },
-    { id: '2', title: '黄果树瀑布一日游' },
+    { id: "1", title: "贵州三日游规划" },
+    { id: "2", title: "黄果树瀑布一日游" },
   ])
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
-      setInputMessage('')
+      setInputMessage("")
     }
   }
 
   const destinations = {
-    '贵阳市': ['南明区', '云岩区', '花溪区', '乌当区', '白云区', '观山湖区', '清镇市'],
-    '遵义市': ['红花岗区', '汇川区', '播州区', '桐梓县', '绥阳县'],
-    '安顺市': ['西秀区', '平坝区', '普定县', '镇宁布依族苗族自治县'],
-    '毕节市': ['七星关区', '大方县', '威宁彝族回族苗族自治县'],
-    '铜仁市': ['碧江区', '万山区', '江口县', '玉屏侗族自治县'],
-    '黔东南州': ['凯里市', '黄平县', '施秉县', '三穗县'],
-    '黔南州': ['都匀市', '福泉市', '荔波县', '贵定县'],
-    '黔西南州': ['兴义市', '兴仁市', '安龙县', '晴隆县'],
-    '六盘水市': ['钟山区', '六枝特区', '水城县', '盘州市'],
+    贵阳市: ["南明区", "云岩区", "花溪区", "乌当区", "白云区", "观山湖区", "清镇市"],
+    遵义市: ["红花岗区", "汇川区", "播州区", "桐梓县", "绥阳县"],
+    安顺市: ["西秀区", "平坝区", "普定县", "镇宁布依族苗族自治县"],
+    毕节市: ["七星关区", "大方县", "威宁彝族回族苗族自治县"],
+    铜仁市: ["碧江区", "万山区", "江口县", "玉屏侗族自治县"],
+    黔东南州: ["凯里市", "黄平县", "施秉县", "三穗县"],
+    黔南州: ["都匀市", "福泉市", "荔波县", "贵定县"],
+    黔西南州: ["兴义市", "兴仁市", "安龙县", "晴隆县"],
+    六盘水市: ["钟山区", "六枝特区", "水城县", "盘州市"],
   }
 
-  const accommodationPreferences = [
-    '近商圈', '交通便利', '近自然/郊区', '近景点'
-  ]
+  const accommodationPreferences = ["近商圈", "交通便利", "近自然/郊区", "近景点"]
 
-  const housingTypes = [
-    '公寓', '民宿', '酒店长租', '包吃包住'
-  ]
+  const housingTypes = ["公寓", "民宿", "酒店长租", "包吃包住"]
 
-  const themePreferences = [
-    '文化体验', '自然风光', '美食探索', '休闲放松', '疗康养', '户外运动'
-  ]
+  const themePreferences = ["文化体验", "自然风光", "美食探索", "休闲放松", "疗康养", "户外运动"]
 
   const presetQuestions = [
     "我想去贵州避暑，帮我规划一个月的旅居行程",
     "帮我找一个在贵州包吃包住的旅居地",
-    "帮我规划一个去村寨、古镇、乡村各住10天的旅居安排"
+    "帮我规划一个去村寨、古镇、乡村各住10天的旅居安排",
   ]
 
   return (
@@ -90,53 +92,58 @@ export default function StayArrangement() {
         {/* Stay Preferences */}
         <Card className="mx-4 mb-6">
           <CardContent className="p-4 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">旅居时间</label>
-              <div className="flex items-center space-x-2">
-                <Slider
-                  defaultValue={[30]}
-                  max={365}
-                  min={30}
-                  step={1}
-                  value={selectedDays}
-                  onValueChange={setSelectedDays}
-                  className="flex-1"
-                />
-                <span className="text-sm font-medium">{selectedDays[0]}天</span>
+            {/* Always visible preferences */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">旅居时间</label>
+                <div className="flex items-center space-x-2">
+                  <Slider
+                    defaultValue={[30]}
+                    max={365}
+                    min={30}
+                    step={1}
+                    value={selectedDays}
+                    onValueChange={setSelectedDays}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium">{selectedDays[0]}天</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">目的地</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择目的地" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(destinations).map(([city, districts]) => (
+                      <SelectGroup key={city}>
+                        <SelectLabel>{city}</SelectLabel>
+                        {districts.map((district) => (
+                          <SelectItem key={district} value={district}>
+                            {district}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">目的地</label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择目的地" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(destinations).map(([city, districts]) => (
-                    <SelectGroup key={city}>
-                      <SelectLabel>{city}</SelectLabel>
-                      {districts.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+            {/* Collapsible preferences */}
             <div>
-              <Button 
-                variant="outline" 
-                className="w-full flex items-center justify-between"
+              <Button
                 onClick={() => setIsExpanded(!isExpanded)}
+                variant="outline"
+                size="sm"
+                className="w-full justify-between"
               >
                 <span>更多偏好设置</span>
-                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
-              
+
               {isExpanded && (
                 <div className="space-y-4 mt-4">
                   <div className="space-y-2">
@@ -148,10 +155,8 @@ export default function StayArrangement() {
                           variant={selectedAccommodation.includes(pref) ? "default" : "secondary"}
                           className="cursor-pointer"
                           onClick={() => {
-                            setSelectedAccommodation(prev => 
-                              prev.includes(pref) 
-                                ? prev.filter(p => p !== pref)
-                                : [...prev, pref]
+                            setSelectedAccommodation((prev) =>
+                              prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref],
                             )
                           }}
                         >
@@ -170,10 +175,8 @@ export default function StayArrangement() {
                           variant={selectedHousingTypes.includes(type) ? "default" : "secondary"}
                           className="cursor-pointer"
                           onClick={() => {
-                            setSelectedHousingTypes(prev => 
-                              prev.includes(type) 
-                                ? prev.filter(t => t !== type)
-                                : [...prev, type]
+                            setSelectedHousingTypes((prev) =>
+                              prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
                             )
                           }}
                         >
@@ -192,10 +195,8 @@ export default function StayArrangement() {
                           variant={selectedThemes.includes(theme) ? "default" : "secondary"}
                           className="cursor-pointer"
                           onClick={() => {
-                            setSelectedThemes(prev => 
-                              prev.includes(theme) 
-                                ? prev.filter(t => t !== theme)
-                                : [...prev, theme]
+                            setSelectedThemes((prev) =>
+                              prev.includes(theme) ? prev.filter((t) => t !== theme) : [...prev, theme],
                             )
                           }}
                         >
@@ -216,11 +217,11 @@ export default function StayArrangement() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium">同行人数（人）</label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       min={1}
                       value={companions}
-                      onChange={(e) => setCompanions(parseInt(e.target.value) || 1)}
+                      onChange={(e) => setCompanions(Number.parseInt(e.target.value) || 1)}
                       className="w-full"
                     />
                   </div>
@@ -228,6 +229,7 @@ export default function StayArrangement() {
               )}
             </div>
 
+            {/* Generate Button */}
             <Button className="w-full">生成我的旅居方案</Button>
           </CardContent>
         </Card>
@@ -292,13 +294,13 @@ export default function StayArrangement() {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="在这里输入问题"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200"
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                  className="w-full pl-10 pr-10 py-3 rounded-full border border-gray-200 focus:ring-0 focus:border-gray-200 bg-blue-50"
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                   <Mic className="w-5 h-5 text-gray-400" />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSendMessage}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-transparent"
                   variant="ghost"
