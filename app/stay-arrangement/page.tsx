@@ -40,6 +40,7 @@ export default function StayArrangement() {
     { id: "2", title: "黄果树瀑布一日游" },
   ])
   const [isExpanded, setIsExpanded] = useState(false)
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
@@ -61,13 +62,13 @@ export default function StayArrangement() {
 
   const accommodationPreferences = ["近商圈", "交通便利", "近自然/郊区", "近景点"]
 
-  const housingTypes = ["公寓常租", "民宿预定", "酒店长租", "包吃包住"]
+  const housingTypes = ["公寓短租", "民宿预定", "酒店长租"]
 
   const themePreferences = ["文化体验", "自然风光", "美食探索", "休闲放松", "疗康养", "户外运动"]
 
   const presetQuestions = [
     "我想去贵州避暑，帮我规划一个月的旅居行程",
-    "帮我找一个在贵州包吃包住的旅居地",
+    "帮我找一个在贵州的旅居地",
     "帮我规划一个去村寨、古镇、乡村各住10天的旅居安排",
   ]
 
@@ -128,7 +129,7 @@ export default function StayArrangement() {
                 <label className="text-sm font-medium">目的地（可多选）</label>
                 <Select onValueChange={handleDestinationChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="选择目的地" />
+                    <SelectValue placeholder="选择您想去的旅居地" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(destinations).map(([city, districts]) => (
@@ -157,7 +158,7 @@ export default function StayArrangement() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">喜好类型</label>
+              <label className="text-sm font-medium">住房类型</label>
               <div className="flex flex-wrap gap-2">
                 {housingTypes.map((type) => (
                   <Badge
@@ -171,6 +172,26 @@ export default function StayArrangement() {
                     }}
                   >
                     {type}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">服务需求</label>
+              <div className="flex flex-wrap gap-2">
+                {["餐饮服务", "订车服务", "家政服务"].map((service) => (
+                  <Badge
+                    key={service}
+                    variant={selectedServices.includes(service) ? "default" : "secondary"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedServices((prev) =>
+                        prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service],
+                      )
+                    }}
+                  >
+                    {service}
                   </Badge>
                 ))}
               </div>
@@ -259,11 +280,12 @@ export default function StayArrangement() {
         </Card>
 
         {/* Preset Questions */}
-        <Card className="mx-4 mb-6">
+        <Card className="mx-4 my-4">
           <CardContent className="p-4">
-            <ul className="space-y-2">
+            <ul className="space-y-2 divide-y divide-gray-200">
               {presetQuestions.map((question, index) => (
-                <li key={index} className="text-sm text-black cursor-pointer hover:underline">
+                <li key={index} className="flex items-center py-2 text-xs text-black cursor-pointer hover:underline">
+                  <div className="w-2 h-2 bg-black rounded-full mr-2 flex-shrink-0"></div>
                   {question}
                 </li>
               ))}

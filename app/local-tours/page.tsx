@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -30,6 +30,12 @@ export default function LocalTours() {
     time: "15天内",
   })
   const [favorites, setFavorites] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  const outdoorRef = useRef<HTMLDivElement>(null)
+  const cultureRef = useRef<HTMLDivElement>(null)
+  const musicRef = useRef<HTMLDivElement>(null)
+  const sportsRef = useRef<HTMLDivElement>(null)
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
@@ -75,6 +81,24 @@ export default function LocalTours() {
     },
   ]
 
+  const categoryButtons = [
+    { name: "户外活动", ref: outdoorRef },
+    { name: "文化展览", ref: cultureRef },
+    { name: "音乐演出", ref: musicRef },
+    { name: "体育赛事", ref: sportsRef },
+    { name: "时令活动", ref: null },
+    { name: "非遗表演", ref: null },
+    { name: "博览展会", ref: null },
+    { name: "剧场演出", ref: null },
+    { name: "光影演出", ref: null },
+  ]
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    if (ref && ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   const activities = [
     {
       id: "1",
@@ -113,13 +137,6 @@ export default function LocalTours() {
     },
   ]
 
-  const categories = [
-    { id: "outdoor", title: "户外活动", image: "/placeholder.svg?height=200&width=200" },
-    { id: "culture", title: "文化展览", image: "/placeholder.svg?height=200&width=200" },
-    { id: "music", title: "音乐演出", image: "/placeholder.svg?height=200&width=200" },
-    { id: "sports", title: "体育赛事", image: "/placeholder.svg?height=200&width=200" },
-  ]
-
   return (
     <div className="min-h-screen max-w-lg mx-auto bg-gradient-to-b from-blue-50 to-white">
       {/* Assistant Profile */}
@@ -154,9 +171,9 @@ export default function LocalTours() {
         </Card>
 
         {/* Activity Plaza Content */}
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 w-full">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-4 shadow-md relative rounded-t-lg">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 shadow-md relative rounded-t-lg">
             <h1 className="text-lg font-medium text-center">本地活动</h1>
           </div>
 
@@ -188,6 +205,29 @@ export default function LocalTours() {
                     ))}
                   </select>
                 </div>
+              ))}
+            </div>
+
+            {/* Category buttons */}
+            <div className="flex overflow-x-auto py-2 px-2 space-x-2 scrollbar-hide">
+              {categoryButtons.map((category) => (
+                <Button
+                  key={category.name}
+                  variant={selectedCategory === category.name ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "flex-shrink-0 text-xs px-3 py-1 rounded-full transition-all duration-200",
+                    selectedCategory === category.name
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-white text-gray-600 hover:bg-gray-100",
+                  )}
+                  onClick={() => {
+                    setSelectedCategory(category.name === selectedCategory ? null : category.name)
+                    if (category.ref) scrollToSection(category.ref)
+                  }}
+                >
+                  {category.name}
+                </Button>
               ))}
             </div>
           </div>
@@ -251,37 +291,101 @@ export default function LocalTours() {
           </div>
 
           {/* Category Sections */}
-          {categories.map((category) => (
-            <div key={category.id} className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">{category.title}</h2>
-                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-600 transition-colors">
-                  更多
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="aspect-square relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group"
-                  >
-                    <Image
-                      src={category.image || "/placeholder.svg"}
-                      alt={`${category.title} ${i}`}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <h3 className="text-white text-sm font-medium truncate">{`${category.title}活动 ${i}`}</h3>
-                      <p className="text-white/80 text-xs mt-1">查看详情</p>
-                    </div>
+          <div ref={outdoorRef} className="mt-8">
+            <h2 className="text-lg font-bold mb-4">户外活动</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group"
+                >
+                  <Image
+                    src="/placeholder.svg?height=200&width=200"
+                    alt={`户外活动 ${i}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white text-sm font-medium truncate">{`户外活动 ${i}`}</h3>
+                    <p className="text-white/80 text-xs mt-1">查看详情</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div ref={cultureRef} className="mt-8">
+            <h2 className="text-lg font-bold mb-4">文化展览</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group"
+                >
+                  <Image
+                    src="/placeholder.svg?height=200&width=200"
+                    alt={`文化展览 ${i}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white text-sm font-medium truncate">{`文化展览 ${i}`}</h3>
+                    <p className="text-white/80 text-xs mt-1">查看详情</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div ref={musicRef} className="mt-8">
+            <h2 className="text-lg font-bold mb-4">音乐演出</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group"
+                >
+                  <Image
+                    src="/placeholder.svg?height=200&width=200"
+                    alt={`音乐演出 ${i}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white text-sm font-medium truncate">{`音乐演出 ${i}`}</h3>
+                    <p className="text-white/80 text-xs mt-1">查看详情</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div ref={sportsRef} className="mt-8">
+            <h2 className="text-lg font-bold mb-4">体育赛事</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group"
+                >
+                  <Image
+                    src="/placeholder.svg?height=200&width=200"
+                    alt={`体育赛事 ${i}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white text-sm font-medium truncate">{`体育赛事 ${i}`}</h3>
+                    <p className="text-white/80 text-xs mt-1">查看详情</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Chat Interface */}
