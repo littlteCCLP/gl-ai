@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Menu, Mic, Send, PlusCircle, History, User, ChevronDown, ChevronUp } from "lucide-react"
+import { Menu, Mic, Send, PlusCircle, History, User, ChevronDown, ChevronUp, X } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -32,7 +32,7 @@ export default function StayArrangement() {
   const [selectedDays, setSelectedDays] = useState([30])
   const [selectedDestinations, setSelectedDestinations] = useState<string[]>([])
   const [selectedAccommodation, setSelectedAccommodation] = useState<string[]>([])
-  const [selectedHousingTypes, setSelectedHousingTypes] = useState<string[]>([])
+  const [selectedPreferenceTypes, setSelectedPreferenceTypes] = useState<string[]>([])
   const [selectedThemes, setSelectedThemes] = useState<string[]>([])
   const [companions, setCompanions] = useState(1)
   const [conversations, setConversations] = useState<{ id: string; title: string }[]>([
@@ -61,7 +61,7 @@ export default function StayArrangement() {
 
   const accommodationPreferences = ["近商圈", "交通便利", "近自然/郊区", "近景点"]
 
-  const housingTypes = ["公寓", "民宿", "酒店长租", "包吃包住"]
+  const housingTypes = ["公寓常租", "民宿预定", "酒店长租", "包吃包住"]
 
   const themePreferences = ["文化体验", "自然风光", "美食探索", "休闲放松", "疗康养", "户外运动"]
 
@@ -70,6 +70,20 @@ export default function StayArrangement() {
     "帮我找一个在贵州包吃包住的旅居地",
     "帮我规划一个去村寨、古镇、乡村各住10天的旅居安排",
   ]
+
+  const handleDestinationChange = (value: string) => {
+    setSelectedDestinations((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((item) => item !== value)
+      } else {
+        return [...prev, value]
+      }
+    })
+  }
+
+  const removeDestination = (value: string) => {
+    setSelectedDestinations((prev) => prev.filter((item) => item !== value))
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -111,8 +125,8 @@ export default function StayArrangement() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">目的地</label>
-                <Select>
+                <label className="text-sm font-medium">目的地（可多选）</label>
+                <Select onValueChange={handleDestinationChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="选择目的地" />
                   </SelectTrigger>
@@ -129,6 +143,36 @@ export default function StayArrangement() {
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedDestinations.map((destination) => (
+                    <Badge key={destination} variant="secondary" className="px-2 py-1">
+                      {destination}
+                      <button onClick={() => removeDestination(destination)} className="ml-1">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">喜好类型</label>
+              <div className="flex flex-wrap gap-2">
+                {housingTypes.map((type) => (
+                  <Badge
+                    key={type}
+                    variant={selectedPreferenceTypes.includes(type) ? "default" : "secondary"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedPreferenceTypes((prev) =>
+                        prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+                      )
+                    }}
+                  >
+                    {type}
+                  </Badge>
+                ))}
               </div>
             </div>
 
@@ -161,26 +205,6 @@ export default function StayArrangement() {
                           }}
                         >
                           {pref}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">住房类型</label>
-                    <div className="flex flex-wrap gap-2">
-                      {housingTypes.map((type) => (
-                        <Badge
-                          key={type}
-                          variant={selectedHousingTypes.includes(type) ? "default" : "secondary"}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            setSelectedHousingTypes((prev) =>
-                              prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-                            )
-                          }}
-                        >
-                          {type}
                         </Badge>
                       ))}
                     </div>
